@@ -1,0 +1,110 @@
+import javax.swing.*;
+import java.awt.*;
+import javax.swing.event.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class DrawingPanel extends JPanel {
+    private int startX;
+    private int endX = 600;
+    private double amplitude = 0.004; // Adjusted default amplitude
+    private List<Missile> missiles = new ArrayList<>();
+    private List<Interceptor> interceptors = new ArrayList<>();
+    private int missileSpeed = 1;
+    private int interceptorSpeed = 2;
+
+    public DrawingPanel(JSlider startXSlider, JSlider amplitudeSlider) {
+        startXSlider.addChangeListener(e -> {
+            startX = startXSlider.getValue();
+            repaint();
+        });
+
+        amplitudeSlider.addChangeListener(e -> {
+            amplitude = amplitudeSlider.getValue() * 0.001; // Adjust scaling factor for amplitude
+            repaint();
+        });
+
+        Timer timer = new Timer(30, e -> {
+            for (Missile missile : missiles) {
+                missile.updatePosition();
+            }
+            for (Interceptor interceptor : interceptors) {
+                interceptor.updatePosition(missiles);
+            }
+            missiles.removeIf(Missile::isDestroyed);
+            interceptors.removeIf(Interceptor::isDestroyed);
+            repaint();
+        });
+        timer.start();
+    }
+
+    public void launchMissile() {
+        missiles.add(new Missile(startX, endX, amplitude, getHeight(), missileSpeed));
+    }
+
+    public void launchInterceptor() {
+        int midX = (startX + endX) / 2;
+        Interceptor interceptor = new Interceptor(midX, interceptorSpeed);
+        for (Missile missile : missiles) {
+            if (!missile.isDestroyed()) {
+                interceptor.setTarget(missile);
+                break;
+            }
+        }
+        interceptors.add(interceptor);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        g.setColor(Color.RED);
+        for (int x = startX; x <= endX; x++) {
+            int y = (int) (amplitude * (x - startX) * (endX - x));
+            g.fillRect(x, getHeight() - y, 3, 3);
+        }
+
+        g.setColor(Color.BLACK);
+        for (Missile missile : missiles) {
+            if (!missile.isDestroyed()) {
+                g.fillOval(missile.getX(), getHeight() - missile.getY(), 10, 10);
+            }
+        }
+
+        g.setColor(Color.BLUE);
+        for (Interceptor interceptor : interceptors) {
+            if (!interceptor.isDestroyed()) {
+                g.fillOval(interceptor.getX(), getHeight() - interceptor.getY(), 10, 10);
+            }
+        }
+
+        g.setColor(Color.GREEN);
+        g.fillRect(endX - 30, getHeight() - 50, 30, 50);
+
+        g.setColor(Color.BLACK);
+        g.fillRect(startX - 20, getHeight() - 20, 30, 50);
+
+        int midX = (startX + endX) / 2;
+        g.setColor(Color.GREEN);
+        g.fillRect(midX - 15, getHeight() - 50, 30, 50);
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(600, 600);
+    }
+
+    public void setMissileSpeed(int missileSpeed) {
+        this.missileSpeed = missileSpeed;
+        for (Missile missile : missiles) {
+            missile.setSpeed(missileSpeed);
+        }
+    }
+
+    public void setInterceptorSpeed(int interceptorSpeed) {
+        this.interceptorSpeed = interceptorSpeed;
+        for (Interceptor interceptor : interceptors) {
+            interceptor.setSpeed(interceptorSpeed);
+        }
+    }
+}

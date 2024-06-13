@@ -1,0 +1,55 @@
+public class Interceptor {
+    private int startX;
+    private int x;
+    private int y;
+    private Missile target;
+    private int speed = 5; // Increase speed for faster interceptors
+    private boolean destroyed = false;
+
+    public Interceptor(int startX) {
+        this.startX = startX;
+        this.x = startX;
+        this.y = 0; // Launch from the top of the frame
+    }
+
+    public void setTarget(Missile target) {
+        this.target = target;
+    }
+
+    public void updatePosition() {
+        if (target != null && !target.isDestroyed()) {
+            int targetX = target.getX();
+            int targetY = target.getY();
+
+            if (x < targetX) {
+                x += speed;
+            } else if (x > targetX) {
+                x -= speed;
+            }
+
+            if (y < targetY) {
+                y += speed;
+            } else if (y > targetY) {
+                y -= speed;
+            }
+
+            if (Math.abs(x - targetX) < speed && Math.abs(y - targetY) < speed) {
+                target.destroy();
+                this.destroyed = true; // Mark interceptor as destroyed
+            }
+        }
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public boolean isDestroyed() {
+        return destroyed;
+    }
+}
+ 

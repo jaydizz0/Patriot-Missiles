@@ -1,0 +1,51 @@
+public class Missile {
+    private int startX;
+    private int x;
+    private int y;
+    private int endX;
+    private double amplitude;
+    private int panelHeight;
+    private boolean destroyed;
+    private int speed;
+
+    public Missile(int startX, int endX, double amplitude, int panelHeight, int speed) {
+        this.startX = startX;
+        this.x = startX;
+        this.y = 0;
+        this.endX = endX;
+        this.amplitude = amplitude;
+        this.panelHeight = panelHeight;
+        this.destroyed = false;
+        this.speed = speed;
+    }
+
+    public void updatePosition() {
+        if (!destroyed && x <= endX) {
+            y = (int) (amplitude * (x - startX) * (endX - x));
+            x += speed;
+            if (y < 0) {
+                destroyed = true;
+            }
+        }
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void destroy() {
+        destroyed = true;
+    }
+
+    public boolean isDestroyed() {
+        return destroyed;
+    }
+
+    public void setSpeed(int speed) {
+        this.speed = speed;
+    }
+}
